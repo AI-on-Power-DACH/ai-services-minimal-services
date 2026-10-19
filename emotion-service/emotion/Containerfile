@@ -1,0 +1,16 @@
+FROM registry.redhat.io/ubi9/python-312-minimal:latest
+
+WORKDIR /opt/services/emotion
+
+COPY src/requirements.txt .
+
+ENV PIP_PREFER_BINARY=true
+ENV PIP_EXTRA_INDEX_URL="https://wheels.developerfirst.ibm.com/ppc64le/linux https://repo.fury.io/mgiessing"
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY src .
+
+CMD ["python", "-m", "uvicorn", "app:app", \
+     "--host", "0.0.0.0", "--port", "9500", \
+     "--loop", "uvloop", "--http", "httptools"]

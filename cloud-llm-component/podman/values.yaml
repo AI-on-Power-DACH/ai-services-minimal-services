@@ -1,0 +1,9 @@
+image: "quay.io/mmielimonka/llm_proxy:dev"
+log_level: "INFO"
+model: "ibm-granite/granite-4.1-8b-fp8"
+maxModelLen: 32768
+maxBatchSize: 32
+cloud_url: "https://localhost/v1"
+cloud_api_key: ""
+cloud_llm: ""
+api_key: ""

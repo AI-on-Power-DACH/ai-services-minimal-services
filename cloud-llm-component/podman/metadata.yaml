@@ -1,0 +1,12 @@
+name: cloud-llm
+version: "1.1.2"
+podTemplateExecutions:
+  - [openai-cloud-llm-secret.yaml.tmpl]
+  - [openai-cloud-llm-cloud-secret.yaml.tmpl]
+  - [proxy-api.yaml.tmpl]
+
+resources:
+  cpu: 1
+  memory: 1073741824 # 1Gi in bytes
+  storage: 0 # No local model storage required (cloud-based service)
+             # setting this to 0 is required to skip model downloading (would fail)

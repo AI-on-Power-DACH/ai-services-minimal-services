@@ -1,0 +1,17 @@
+id: emotion
+name: "Test Service"
+description: "Hey, I'm just here testing!"
+type: service
+certified_by: "IBM Dach Tech Sales"
+version: "1.1.0"
+standalone: true  # true => deployable in services tab
+dependencies:
+  - id: llm
+
+about:
+  - title: "Service Info"
+    sections:
+    - title: "Version"
+      value: "1.1.0"
+    - title: "What"
+      value: "A super cool categorisation service for testing :)"

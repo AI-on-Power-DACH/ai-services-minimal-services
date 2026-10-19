@@ -1,0 +1,17 @@
+id: openai-cloud-llm
+name: "OpenAI Compatible Cloud LLM"
+description: "This component brokers LLM calls to a cloud LLM using the OpenAI api."
+type: component
+component_type: llm
+certified_by: "NSA"
+version: "1.1.2"
+default: true
+
+
+about:
+  - title: "Service Info"
+    sections:
+    - title: "Version"
+      value: "1.1.1"
+    - title: "What"
+      value: "A API broker that calls a openAI compatible cloud API from openAI api calls made to the spyre hosted api endpoint."

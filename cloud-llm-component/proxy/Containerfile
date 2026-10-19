@@ -1,0 +1,23 @@
+FROM registry.redhat.io/ubi9/python-314-minimal:latest
+
+# Prefer binary wheels and add ppc64le wheel indexes
+ENV PIP_PREFER_BINARY=true
+ENV PIP_EXTRA_INDEX_URL="https://wheels.developerfirst.ibm.com/ppc64le/linux https://repo.fury.io/mgiessing"
+
+ENV LOG_LEVEL=INFO
+ENV PORT=8080
+
+WORKDIR /app
+
+# Install dependencies as root before dropping privileges
+COPY --chown=1001:0 requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application source
+COPY --chown=1001:0 src/main.py src/settings.py ./
+
+EXPOSE 8080
+
+USER 1001
+
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]

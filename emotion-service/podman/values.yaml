@@ -1,0 +1,4 @@
+emotion:
+  port: ""
+  image: "quay.io/mmielimonka/emotion-service:dev"
+  log_level: "DEBUG"

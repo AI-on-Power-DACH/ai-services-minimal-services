@@ -1,0 +1,9 @@
+name: emotion
+version: "1.1.0"
+podTemplateExecutions:
+  - [emotion-api.yaml.tmpl]
+
+resources:
+  cpu: 1
+  memory: 1073741824 # 1GiB in bytes
+  storage: 2147483648 # 2GB in bytes

@@ -1,0 +1,89 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "cloud-llm-proxy-{{ .InstanceSlug }}"
+  labels:
+    ai-services.io/template: "{{ .TemplateID }}"
+    {{- if and .Values.api_key .Values.cloud_api_key }}
+    ai-services.io/secret: "openai-cloud-llm-secret-{{ .InstanceSlug }},openai-cloud-llm-cloud-secret-{{ .InstanceSlug }}"
+    ai-services.io/volume: "openai-cloud-llm-secret-{{ .InstanceSlug }},openai-cloud-llm-cloud-secret-{{ .InstanceSlug }}"
+    {{- else if .Values.api_key }}
+    ai-services.io/secret: "openai-cloud-llm-secret-{{ .InstanceSlug }}"
+    ai-services.io/volume: "openai-cloud-llm-secret-{{ .InstanceSlug }}"
+    {{- else if .Values.cloud_api_key }}
+    ai-services.io/secret: "openai-cloud-llm-cloud-secret-{{ .InstanceSlug }}"
+    ai-services.io/volume: "openai-cloud-llm-cloud-secret-{{ .InstanceSlug }}"
+    {{- end }}
+  annotations:
+    ai-services.io/routes: "8080:cloud-llm-proxy-{{ .InstanceSlug }}:api"
+spec:
+  restartPolicy: always
+  volumes:
+    {{- if .Values.api_key }}
+    - name: openai-cloud-llm-secret
+      secret:
+        secretName: "openai-cloud-llm-secret-{{ .InstanceSlug }}"
+    {{- end }}
+    {{- if .Values.cloud_api_key }}
+    - name: openai-cloud-llm-cloud-secret
+      secret:
+        secretName: "openai-cloud-llm-cloud-secret-{{ .InstanceSlug }}"
+    {{- end }}
+  containers:
+    - name: cloud-llm-proxy
+      image: "{{ .Values.image }}"
+      command: ["/bin/bash"]
+      args:
+        - "-c"
+        - |
+          {{- if .Values.cloud_api_key }}
+          export CLOUD_API_KEY=$(cat /etc/secret/openai-cloud-llm-cloud-secret/cloudApiKey)
+          {{- end }}
+          {{- if .Values.api_key }}
+          export LOCAL_API_KEY=$(cat /etc/secret/openai-cloud-llm-secret/apiKey)
+          {{- end }}
+          exec uvicorn main:app --app-dir /app --host 0.0.0.0 --port 8080
+      env:
+        - name: CLOUD_URL
+          value: "{{ .Values.cloud_url }}"
+        - name: CLOUD_MODEL_ID
+          value: "{{ .Values.cloud_llm }}"
+        - name: LOG_LEVEL
+          value: "{{ .Values.log_level }}"
+        - name: PORT
+          value: "8080"
+      resources:
+        requests:
+          memory: "256Mi"
+        limits:
+          memory: "1Gi"
+      ports:
+        - containerPort: 8080
+          protocol: TCP
+      readinessProbe:
+        httpGet:
+          path: /health
+          port: 8080
+        initialDelaySeconds: 5
+        periodSeconds: 10
+        timeoutSeconds: 5
+        failureThreshold: 3
+      livenessProbe:
+        httpGet:
+          path: /health
+          port: 8080
+        initialDelaySeconds: 5
+        periodSeconds: 30
+        timeoutSeconds: 5
+        failureThreshold: 3
+      volumeMounts:
+        {{- if .Values.api_key }}
+        - mountPath: /etc/secret/openai-cloud-llm-secret
+          name: openai-cloud-llm-secret
+          readOnly: true
+        {{- end }}
+        {{- if .Values.cloud_api_key }}
+        - mountPath: /etc/secret/openai-cloud-llm-cloud-secret
+          name: openai-cloud-llm-cloud-secret
+          readOnly: true
+        {{- end }}
